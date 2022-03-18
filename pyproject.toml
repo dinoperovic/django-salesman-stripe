@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "django-salesman-stripe"
+version = "0.1.0"
+description = "Stripe payment integration for Salesman."
+authors = ["Dino Perovic <dino.perovic@gmail.com>"]
+license = "BSD-3-Clause"
+readme = "README.md"
+homepage = "https://pypi.org/project/django-salesman-stripe/"
+repository = "https://github.com/dinoperovic/django-salesman-stripe"
+documentation = "https://django-salesman-stripe.readthedocs.io"
+keywords = ["e-commerce", "headless", "rest-api", "shop", "framework"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Django",
+    "Framework :: Django :: 3.1",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
+    "Framework :: Wagtail",
+    "Framework :: Wagtail :: 2",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Internet",
+]
+packages = [
+    {include = "salesman_stripe"},
+]
+include = ["LICENSE"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4.0"
+django = ">=3.1,<4.1"
+django-salesman = ">=1.1.2"
+stripe = "^2.67.0"
+
+[tool.poetry.dev-dependencies]
+isort = "~5.10.1"
+black = "~22.1.0"
+flake8 = "~3.9.0"
+mypy = "~0.931"
+
+[tool.black]
+skip-string-normalization = true
+exclude = '/(\.git|\.venv|dist|migrations)/'
+
+[tool.isort]
+profile = "black"
+skip = ".git,.venv,dist,migrations"
+known_first_party = ["salesman_stripe"]
+known_third_party = ["salesman"]
+
+[tool.mypy]
+ignore_missing_imports = true
+exclude = ".git|.venv|dist|migrations"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

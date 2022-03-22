@@ -1,9 +1,9 @@
 # Salesman Stripe
 
-![PyPI](https://img.shields.io/pypi/v/django-salesman-stripe)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/django-salesman-stripe)
-![PyPI - Django Version](https://img.shields.io/pypi/djversions/django-salesman-stripe)
-![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
+[![PyPI](https://img.shields.io/pypi/v/django-salesman-stripe)](https://pypi.org/project/django-salesman-stripe/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/django-salesman-stripe)](https://pypi.org/project/django-salesman-stripe/)
+[![PyPI - Django Version](https://img.shields.io/pypi/djversions/django-salesman-stripe)](https://pypi.org/project/django-salesman-stripe/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 [Stripe](https://stripe.com/) payment integration for [Salesman](https://github.com/dinoperovic/django-salesman).
 

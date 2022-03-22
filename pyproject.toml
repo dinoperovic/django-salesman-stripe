@@ -7,8 +7,7 @@ license = "BSD-3-Clause"
 readme = "README.md"
 homepage = "https://pypi.org/project/django-salesman-stripe/"
 repository = "https://github.com/dinoperovic/django-salesman-stripe"
-documentation = "https://django-salesman-stripe.readthedocs.io"
-keywords = ["e-commerce", "headless", "rest-api", "shop", "framework"]
+keywords = ["Stripe", "Salesman", "e-commerce"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Framework :: Django",

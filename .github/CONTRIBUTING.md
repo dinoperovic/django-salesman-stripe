@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to Salesman.
+Thank you for your interest in contributing to Salesman Stripe.
 
 Before you continue please consider discussing your desired changes using an issue tracker.
 

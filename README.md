@@ -7,7 +7,6 @@
 
 [Stripe](https://stripe.com/) payment integration for [Salesman](https://github.com/dinoperovic/django-salesman).
 
-
 ## Installation
 
 Install the package using pip:
@@ -89,13 +88,12 @@ from salesman_stripe.payment import StripePayment
 from salesman_stripe.conf import app_settings
 
 class MyStripePayment(StripePayment):
-    def get_stripe_customer_data(self, user, request):
+    def get_stripe_customer_data(self, obj, request):
         # https://stripe.com/docs/api/customers/create
-        return {
-            'email': user.email,
-            'name': user.get_full_name() or user.get_username(),
-            'phone': user.phone_number,
-        }
+        data = super().get_stripe_customer_data(obj, request)
+        if obj.user and obj.user.phone_number:
+            data['phone'] = obj.user.phone_number
+        return data
 
     def get_currency(self, request):
         currency = request.GET.get('currency', None)

@@ -34,12 +34,16 @@ BasketItemOrOrderItem = TypeVar('BasketItemOrOrderItem', BaseBasketItem, BaseOrd
 
 
 class StripePayment(PaymentMethod):
+    """
+    Stripe payment method.
+    """
+
     identifier = 'stripe'
     label = app_settings.SALESMAN_STRIPE_PAYMENT_LABEL
 
     def get_urls(self) -> list:
         """
-        Register Stripe return views.
+        Register Stripe views.
         """
         return [
             path('cancel/', self.cancel_view, name='stripe-cancel'),
@@ -92,7 +96,7 @@ class StripePayment(PaymentMethod):
         See available data to be set in Stripe:
         https://stripe.com/docs/api/checkout/sessions/create
         """
-        customer = self.get_stripe_customer(obj.user, request)
+        customer = self.get_stripe_customer(obj, request)
 
         return {
             'mode': 'payment',
@@ -130,14 +134,14 @@ class StripePayment(PaymentMethod):
 
     def get_stripe_customer(
         self,
-        user: AbstractUser,
+        obj: BasketOrOrder,
         request: HttpRequest,
     ) -> StripeObject:
         """
         Creates or updates the Stripe customer.
         """
-        customer_data = self.get_stripe_customer_data(user, request)
-        customer_id = self.get_stripe_customer_id(user)
+        customer_data = self.get_stripe_customer_data(obj, request)
+        customer_id = self.get_stripe_customer_id(obj)
         if customer_id:
             try:
                 customer = stripe.Customer.modify(customer_id, **customer_data)
@@ -145,12 +149,12 @@ class StripePayment(PaymentMethod):
                 customer_id = None
         if not customer_id:
             customer = stripe.Customer.create(**customer_data)
-            self.save_stripe_customer_id(user, customer.id)
+            self.save_stripe_customer_id(obj, customer.id)
         return customer
 
     def get_stripe_customer_data(
         self,
-        user: AbstractUser,
+        obj: BasketOrOrder,
         request: HttpRequest,
     ) -> dict:
         """
@@ -159,27 +163,33 @@ class StripePayment(PaymentMethod):
         See available data to be set in Stripe:
         https://stripe.com/docs/api/customers/create
         """
+        if not obj.user:
+            return {'email': getattr(obj, 'email', obj.extra['email'])}
+
         return {
-            'email': user.email,
-            'name': user.get_full_name() or user.get_username(),
+            'email': obj.user.email,
+            'name': obj.user.get_full_name() or obj.user.get_username(),
         }
 
-    def get_stripe_customer_id(self, user: AbstractUser) -> Optional[str]:
+    def get_stripe_customer_id(self, obj: BasketOrOrder) -> Optional[str]:
         """
-        Retrieves Stripe customer ID for the User.
+        Retrieves Stripe customer ID for Basket or Order.
         """
-        return getattr(user, 'stripe_customer_id', None)
+        if not obj.user:
+            return getattr(obj.user, 'stripe_customer_id', None)
+        return None
 
-    def save_stripe_customer_id(self, user: AbstractUser, customer_id: str) -> None:
+    def save_stripe_customer_id(self, obj: BasketOrOrder, customer_id: str) -> None:
         """
-        Saves the new Stripe customer ID for User.
+        Saves the new Stripe customer ID for Basket or Order.
         """
-        try:
-            user._meta.get_field('stripe_customer_id')
-            user.stripe_customer_id = customer_id
-            user.save(update_fields=['stripe_customer_id'])
-        except FieldDoesNotExist:
-            pass
+        if obj.user:
+            try:
+                obj.user._meta.get_field('stripe_customer_id')
+                obj.user.stripe_customer_id = customer_id
+                obj.user.save(update_fields=['stripe_customer_id'])
+            except FieldDoesNotExist:
+                pass
 
     def refund_payment(self, payment: BaseOrderPayment) -> bool:
         """

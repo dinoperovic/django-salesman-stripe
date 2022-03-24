@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-salesman-stripe"
-version = "0.1.0"
+version = "0.1.1"
 description = "Stripe payment integration for Salesman."
 authors = ["Dino Perovic <dino.perovic@gmail.com>"]
 license = "BSD-3-Clause"

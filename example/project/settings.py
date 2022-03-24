@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'salesman.orders',
     'salesman.admin',
     'rest_framework',
+    'salesman_stripe',
     'shop',
 ]
 

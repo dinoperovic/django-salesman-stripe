@@ -5,14 +5,9 @@ from decimal import Decimal
 from typing import Optional, TypeVar
 
 import stripe
-from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import FieldDoesNotExist
-from django.http import (
-    HttpRequest,
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseRedirect,
-)
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
+from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -234,8 +229,8 @@ class StripePayment(PaymentMethod):
         Handle cancelled payment on Stripe.
         """
         if app_settings.SALESMAN_STRIPE_CANCEL_URL:
-            return HttpResponseRedirect(app_settings.SALESMAN_STRIPE_CANCEL_URL)
-        return HttpResponse("Stripe payment cancelled")
+            return redirect(app_settings.SALESMAN_STRIPE_CANCEL_URL)
+        return render(request, 'salesman_stripe/cancel.html')
 
     @classmethod
     def success_view(cls, request: HttpRequest) -> HttpResponse:
@@ -243,8 +238,8 @@ class StripePayment(PaymentMethod):
         Handle successfull payment on Stripe.
         """
         if app_settings.SALESMAN_STRIPE_SUCCESS_URL:
-            return HttpResponseRedirect(app_settings.SALESMAN_STRIPE_SUCCESS_URL)
-        return HttpResponse("Stripe payment successfull")
+            return redirect(app_settings.SALESMAN_STRIPE_SUCCESS_URL)
+        return render(request, 'salesman_stripe/success.html')
 
     @classmethod
     @method_decorator(csrf_exempt)

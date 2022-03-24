@@ -18,6 +18,7 @@ pip install django-salesman-stripe
 Add to your setting file:
 
 ```python
+INSTALLED_APPS += ['salesman_stripe']
 SALESMAN_PAYMENT_METHODS = ['salesman_stripe.payment.StripePayment']
 SALESMAN_STRIPE_SECRET_KEY = '<stripe-secret-key>'
 SALESMAN_STRIPE_WEBHOOK_SECRET = '<stripe-webhook-secret>'

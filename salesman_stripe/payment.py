@@ -170,7 +170,7 @@ class StripePayment(PaymentMethod):
         """
         Retrieves Stripe customer ID for Basket or Order.
         """
-        if not obj.user:
+        if obj.user:
             return getattr(obj.user, 'stripe_customer_id', None)
         return None
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 
 class AppSettings:
@@ -9,21 +9,21 @@ class AppSettings:
         """
         Stripe API secret key.
         """
-        return self._required_setting('SALESMAN_STRIPE_SECRET_KEY')
+        return str(self._required_setting("SALESMAN_STRIPE_SECRET_KEY"))
 
     @property
     def SALESMAN_STRIPE_WEBHOOK_SECRET(self) -> str:
         """
         Stripe webhook secret.
         """
-        return self._required_setting('SALESMAN_STRIPE_WEBHOOK_SECRET')
+        return str(self._required_setting("SALESMAN_STRIPE_WEBHOOK_SECRET"))
 
     @property
     def SALESMAN_STRIPE_PAYMENT_LABEL(self) -> str:
         """
         Payment method label used when displayed in the basket.
         """
-        return self._setting('SALESMAN_STRIPE_DEFAULT_CURRENCY', 'Pay with Stripe')
+        return str(self._setting("SALESMAN_STRIPE_DEFAULT_CURRENCY", "Pay with Stripe"))
 
     @property
     def SALESMAN_STRIPE_DEFAULT_CURRENCY(self) -> str:
@@ -31,28 +31,28 @@ class AppSettings:
         Default ISO currency used for payments, must be set to a valid Stripe currency.
         https://stripe.com/docs/currencies
         """
-        return self._setting('SALESMAN_STRIPE_DEFAULT_CURRENCY', 'USD')
+        return str(self._setting("SALESMAN_STRIPE_DEFAULT_CURRENCY", "USD"))
 
     @property
-    def SALESMAN_STRIPE_CANCEL_URL(self) -> Optional[str]:
+    def SALESMAN_STRIPE_CANCEL_URL(self) -> str:
         """
         URL to redirect to when Stripe payment is cancelled.
         """
-        return self._setting('SALESMAN_STRIPE_CANCEL_URL')
+        return str(self._setting("SALESMAN_STRIPE_CANCEL_URL", default=""))
 
     @property
-    def SALESMAN_STRIPE_SUCCESS_URL(self) -> Optional[str]:
+    def SALESMAN_STRIPE_SUCCESS_URL(self) -> str:
         """
         URL to redirect to when Stripe payment is successfull.
         """
-        return self._setting('SALESMAN_STRIPE_SUCCESS_URL')
+        return str(self._setting("SALESMAN_STRIPE_SUCCESS_URL", default=""))
 
     @property
     def SALESMAN_STRIPE_PAID_STATUS(self) -> str:
         """
         Default paid status for fullfiled orders.
         """
-        return self._setting('SALESMAN_STRIPE_PAID_STATUS', 'PROCESSING')
+        return str(self._setting("SALESMAN_STRIPE_PAID_STATUS", "PROCESSING"))
 
     def _setting(self, name: str, default: Any = None) -> Any:
         from django.conf import settings

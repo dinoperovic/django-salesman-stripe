@@ -10,9 +10,13 @@ To get started you should fork and clone the repo, then setup your project using
 
 ```bash
 poetry install
+poetry run pre-commit install
 ```
 
-Check code style using `make check`.
+You can manually lint using:
+```bash
+poetry run pre-commit run --all-files
+```
 
 ## Pull request
 

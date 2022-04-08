@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal
-from typing import Optional, TypeVar
+from typing import Any, TypeVar
 
 import stripe
 from django.core.exceptions import FieldDoesNotExist
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect, render
-from django.urls import path, reverse
+from django.urls import URLPattern, URLResolver, path, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from salesman.basket.models import BaseBasket, BaseBasketItem
@@ -24,26 +24,26 @@ stripe.api_key = app_settings.SALESMAN_STRIPE_SECRET_KEY
 
 logger = logging.getLogger(__name__)
 
-BasketOrOrder = TypeVar('BasketOrOrder', BaseBasket, BaseOrder)
-BasketItemOrOrderItem = TypeVar('BasketItemOrOrderItem', BaseBasketItem, BaseOrderItem)
+BasketOrOrder = TypeVar("BasketOrOrder", BaseBasket, BaseOrder)
+BasketItemOrOrderItem = TypeVar("BasketItemOrOrderItem", BaseBasketItem, BaseOrderItem)
 
 
-class StripePayment(PaymentMethod):
+class StripePayment(PaymentMethod):  # type: ignore
     """
     Stripe payment method.
     """
 
-    identifier = 'stripe'
+    identifier = "stripe"
     label = app_settings.SALESMAN_STRIPE_PAYMENT_LABEL
 
-    def get_urls(self) -> list:
+    def get_urls(self) -> list[URLPattern | URLResolver]:
         """
         Register Stripe views.
         """
         return [
-            path('cancel/', self.cancel_view, name='stripe-cancel'),
-            path('success/', self.success_view, name='stripe-success'),
-            path('webhook/', self.webhook_view, name='stripe-webhook'),
+            path("cancel/", self.cancel_view, name="stripe-cancel"),
+            path("success/", self.success_view, name="stripe-success"),
+            path("webhook/", self.webhook_view, name="stripe-webhook"),
         ]
 
     def basket_payment(self, basket: BaseBasket, request: HttpRequest) -> str:
@@ -64,7 +64,8 @@ class StripePayment(PaymentMethod):
         """
         try:
             session = self.get_stripe_session(obj, request)
-            return session.url
+            url: str = session.url
+            return url
         except StripeError as e:
             logger.error(e)
             raise PaymentError(str(e))
@@ -84,7 +85,7 @@ class StripePayment(PaymentMethod):
         self,
         obj: BasketOrOrder,
         request: HttpRequest,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Returns Stripe session data to be sent during checkout create.
 
@@ -94,12 +95,12 @@ class StripePayment(PaymentMethod):
         customer = self.get_stripe_customer(obj, request)
 
         return {
-            'mode': 'payment',
-            'cancel_url': request.build_absolute_uri(reverse('stripe-cancel')),
-            'success_url': request.build_absolute_uri(reverse('stripe-success')),
-            'client_reference_id': self.get_reference(obj),
-            'customer': customer.id,
-            'line_items': [
+            "mode": "payment",
+            "cancel_url": request.build_absolute_uri(reverse("stripe-cancel")),
+            "success_url": request.build_absolute_uri(reverse("stripe-success")),
+            "client_reference_id": self.get_reference(obj),
+            "customer": customer.id,
+            "line_items": [
                 self.get_stripe_line_item_data(item, request)
                 for item in obj.get_items()
             ],
@@ -109,7 +110,7 @@ class StripePayment(PaymentMethod):
         self,
         item: BasketItemOrOrderItem,
         request: HttpRequest,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Returns Stripe session line item data.
 
@@ -117,14 +118,14 @@ class StripePayment(PaymentMethod):
         https://stripe.com/docs/api/checkout/sessions/create#create_checkout_session-line_items
         """
         return {
-            'price_data': {
-                'currency': self.get_currency(request),
-                'unit_amount': int(item.total * 100),
-                'product_data': {
-                    'name': f"{item.quantity}x {item.name}",
+            "price_data": {
+                "currency": self.get_currency(request),
+                "unit_amount": int(item.total * 100),
+                "product_data": {
+                    "name": f"{item.quantity}x {item.name}",
                 },
             },
-            'quantity': 1,
+            "quantity": 1,
         }
 
     def get_stripe_customer(
@@ -151,7 +152,7 @@ class StripePayment(PaymentMethod):
         self,
         obj: BasketOrOrder,
         request: HttpRequest,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Returns customer data to be save on a Stripe customer.
 
@@ -159,19 +160,19 @@ class StripePayment(PaymentMethod):
         https://stripe.com/docs/api/customers/create
         """
         if not obj.user:
-            return {'email': getattr(obj, 'email', obj.extra['email'])}
+            return {"email": getattr(obj, "email", obj.extra["email"])}
 
         return {
-            'email': obj.user.email,
-            'name': obj.user.get_full_name() or obj.user.get_username(),
+            "email": obj.user.email,
+            "name": obj.user.get_full_name() or obj.user.get_username(),
         }
 
-    def get_stripe_customer_id(self, obj: BasketOrOrder) -> Optional[str]:
+    def get_stripe_customer_id(self, obj: BasketOrOrder) -> str | None:
         """
         Retrieves Stripe customer ID for Basket or Order.
         """
         if obj.user:
-            return getattr(obj.user, 'stripe_customer_id', None)
+            return getattr(obj.user, "stripe_customer_id", None)
         return None
 
     def save_stripe_customer_id(self, obj: BasketOrOrder, customer_id: str) -> None:
@@ -180,9 +181,9 @@ class StripePayment(PaymentMethod):
         """
         if obj.user:
             try:
-                obj.user._meta.get_field('stripe_customer_id')
+                obj.user._meta.get_field("stripe_customer_id")
                 obj.user.stripe_customer_id = customer_id
-                obj.user.save(update_fields=['stripe_customer_id'])
+                obj.user.save(update_fields=["stripe_customer_id"])
             except FieldDoesNotExist:
                 pass
 
@@ -208,17 +209,17 @@ class StripePayment(PaymentMethod):
         Returns a Stripe reference ID for the given object used to identify the session.
         """
         if isinstance(obj, BaseBasket):
-            return f'basket_{obj.id}'
-        return f'order_{obj.id}'
+            return f"basket_{obj.id}"
+        return f"order_{obj.id}"
 
     @classmethod
-    def parse_reference(cls, reference: str) -> tuple[Optional[str], Optional[str]]:
+    def parse_reference(cls, reference: str) -> tuple[str | None, str | None]:
         """
         Parses the Stripe reference ID returning the object kind and ID.
         """
         try:
-            kind, id = reference.split('_')
-            assert kind in ('basket', 'order')
+            kind, id = reference.split("_")
+            assert kind in ("basket", "order")
             return kind, id
         except Exception:
             return None, None
@@ -230,7 +231,7 @@ class StripePayment(PaymentMethod):
         """
         if app_settings.SALESMAN_STRIPE_CANCEL_URL:
             return redirect(app_settings.SALESMAN_STRIPE_CANCEL_URL)
-        return render(request, 'salesman_stripe/cancel.html')
+        return render(request, "salesman_stripe/cancel.html")
 
     @classmethod
     def success_view(cls, request: HttpRequest) -> HttpResponse:
@@ -239,16 +240,16 @@ class StripePayment(PaymentMethod):
         """
         if app_settings.SALESMAN_STRIPE_SUCCESS_URL:
             return redirect(app_settings.SALESMAN_STRIPE_SUCCESS_URL)
-        return render(request, 'salesman_stripe/success.html')
+        return render(request, "salesman_stripe/success.html")
 
     @classmethod
-    @method_decorator(csrf_exempt)
+    @method_decorator(csrf_exempt)  # type: ignore
     def webhook_view(cls, request: HttpRequest) -> HttpResponse:
         """
         Webhook view that is accessed asynchronously from Stripe.
         """
         payload = request.body
-        sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', None)
+        sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", None)
         secret = app_settings.SALESMAN_STRIPE_WEBHOOK_SECRET
         event = None
 
@@ -272,7 +273,7 @@ class StripePayment(PaymentMethod):
         """
         Handles event returned from Stripe.
         """
-        if event.type == 'checkout.session.completed':
+        if event.type == "checkout.session.completed":
             session = event.data.object
             return cls.handle_webhook_session_completed(request, session)
         return HttpResponse("Event ignored")
@@ -286,21 +287,21 @@ class StripePayment(PaymentMethod):
         """
         Fullfill order after a successfull webhook request for session.
         """
-        Basket = get_salesman_model('Basket')
-        Order = get_salesman_model('Order')
+        Basket = get_salesman_model("Basket")
+        Order = get_salesman_model("Order")
 
         kind, id = cls.parse_reference(session.client_reference_id)
-        if kind == 'basket':
+        if kind == "basket":
             try:
                 basket = Basket.objects.get(id=id)
             except BaseBasket.DoesNotExist:
                 logger.error(f"Missing basket: {id}")
                 return HttpResponseBadRequest("Missing basket")
 
-            kwargs = {'status': app_settings.SALESMAN_STRIPE_PAID_STATUS}
+            kwargs = {"status": app_settings.SALESMAN_STRIPE_PAID_STATUS}
             order = Order.objects.create_from_basket(basket, request, **kwargs)
             basket.delete()
-        elif kind == 'order':
+        elif kind == "order":
             try:
                 order = Order.objects.get(id=id)
             except BaseOrder.DoesNotExist:

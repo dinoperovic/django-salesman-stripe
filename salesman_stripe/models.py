@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class StripeCustomerMixin(models.Model):
+class StripeCustomerMixin(models.Model):  # type: ignore
     """
     Abstract model that enables saving Stripe customer ID relation to the User model.
 

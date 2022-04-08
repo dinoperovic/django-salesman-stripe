@@ -1,6 +1,7 @@
 # Salesman Stripe
 
 [![PyPI](https://img.shields.io/pypi/v/django-salesman-stripe)](https://pypi.org/project/django-salesman-stripe/)
+[![Test](https://img.shields.io/github/workflow/status/dinoperovic/django-salesman-stripe/Test/master)](https://github.com/dinoperovic/django-salesman-stripe/actions?query=workflow:Test)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/django-salesman-stripe)](https://pypi.org/project/django-salesman-stripe/)
 [![PyPI - Django Version](https://img.shields.io/pypi/djversions/django-salesman-stripe)](https://pypi.org/project/django-salesman-stripe/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)

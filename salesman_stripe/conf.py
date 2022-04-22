@@ -23,7 +23,7 @@ class AppSettings:
         """
         Payment method label used when displayed in the basket.
         """
-        return str(self._setting("SALESMAN_STRIPE_DEFAULT_CURRENCY", "Pay with Stripe"))
+        return str(self._setting("SALESMAN_STRIPE_PAYMENT_LABEL", "Pay with Stripe"))
 
     @property
     def SALESMAN_STRIPE_DEFAULT_CURRENCY(self) -> str:

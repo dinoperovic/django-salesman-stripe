@@ -11,10 +11,10 @@ from django.shortcuts import redirect, render
 from django.urls import URLPattern, URLResolver, path, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from salesman.basket.models import BaseBasket, BaseBasketItem
+from salesman.basket.models import BaseBasket
 from salesman.checkout.payment import PaymentError, PaymentMethod
 from salesman.core.utils import get_salesman_model
-from salesman.orders.models import BaseOrder, BaseOrderItem, BaseOrderPayment
+from salesman.orders.models import BaseOrder, BaseOrderPayment
 from stripe.error import SignatureVerificationError, StripeError
 from stripe.stripe_object import StripeObject
 
@@ -25,7 +25,6 @@ stripe.api_key = app_settings.SALESMAN_STRIPE_SECRET_KEY
 logger = logging.getLogger(__name__)
 
 BasketOrOrder = TypeVar("BasketOrOrder", BaseBasket, BaseOrder)
-BasketItemOrOrderItem = TypeVar("BasketItemOrOrderItem", BaseBasketItem, BaseOrderItem)
 
 
 class StripePayment(PaymentMethod):  # type: ignore
@@ -100,33 +99,38 @@ class StripePayment(PaymentMethod):  # type: ignore
             "success_url": request.build_absolute_uri(reverse("stripe-success")),
             "client_reference_id": self.get_reference(obj),
             "customer": customer.id,
-            "line_items": [
-                self.get_stripe_line_item_data(item, request)
-                for item in obj.get_items()
-            ],
+            "line_items": self.get_stripe_line_items_data(obj, request),
         }
 
-    def get_stripe_line_item_data(
+    def get_stripe_line_items_data(
         self,
-        item: BasketItemOrOrderItem,
+        obj: BasketOrOrder,
         request: HttpRequest,
-    ) -> dict[str, Any]:
+    ) -> list[dict[str, Any]]:
         """
-        Returns Stripe session line item data.
+        Returns Stripe session line items data.
 
         See available data to be set in Stripe:
         https://stripe.com/docs/api/checkout/sessions/create#create_checkout_session-line_items
         """
-        return {
-            "price_data": {
-                "currency": self.get_currency(request),
-                "unit_amount": int(item.total * 100),
-                "product_data": {
-                    "name": f"{item.quantity}x {item.name}",
+        return [
+            {
+                "price_data": {
+                    "currency": self.get_currency(request),
+                    "unit_amount": int(obj.total * 100),
+                    "product_data": {
+                        "name": f"Purchase {len(obj.get_items())} items",
+                        "description": ", ".join(
+                            [
+                                f"{item.quantity}x {item.name}"
+                                for item in obj.get_items()
+                            ]
+                        ),
+                    },
                 },
-            },
-            "quantity": 1,
-        }
+                "quantity": 1,
+            }
+        ]
 
     def get_stripe_customer(
         self,

@@ -1,15 +1,6 @@
 name: Test
 
-on:
-  push:
-    branches:
-      - master
-      - 'release/**'
-    paths:
-      - '**.py'
-  pull_request:
-    paths:
-      - '**.py'
+on: [push, pull_request]
 
 jobs:
   lint:

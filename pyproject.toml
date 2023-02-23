@@ -14,6 +14,7 @@ classifiers = [
     "Framework :: Django :: 3.1",
     "Framework :: Django :: 3.2",
     "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
     "Framework :: Wagtail",
     "Framework :: Wagtail :: 2",
     "Intended Audience :: Developers",
@@ -27,7 +28,6 @@ include = ["LICENSE"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
-django = ">=3.1,<4.1"
 django-salesman = ">=1.1.3"
 stripe = "^2.67.0"
 
